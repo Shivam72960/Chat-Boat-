@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gemini AI Chatbot with Image Analysis</title>
+  <style>
+    body {
+      background-color: #f7f9fc;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .chat-container {
+      width: 600px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+    }
+    .chat-box {
+      flex-grow: 1;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 8px;
+      background: #fafafa;
+      margin-bottom: 15px;
+    }
+    .message {
+      margin: 8px 0;
+      padding: 10px 15px;
+      border-radius: 20px;
+      max-width: 70%;
+      line-height: 1.4;
+      clear: both;
+      word-wrap: break-word;
+    }
+    .user-msg {
+      background-color: #007bff;
+      color: white;
+      float: right;
+      text-align: right;
+    }
+    .bot-msg {
+      background-color: #e5e5ea;
+      color: black;
+      float: left;
+      text-align: left;
+    }
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    input[type="text"] {
+      flex-grow: 1;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    input[type="file"] {
+      flex-grow: 1;
+      padding: 8px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div id="chatBox" class="chat-box"></div>
+
+    <!-- Text message input -->
+    <div class="input-row">
+      <input type="text" id="userInput" placeholder="Type your message here..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <!-- Image upload input -->
+    <div class="input-row">
+      <input type="file" id="imageInput" accept="image/*" />
+      <button onclick="sendImage()">Analyze Image</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chatBox');
+
+    function appendMessage(text, isUser) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message ' + (isUser ? 'user-msg' : 'bot-msg');
+      msgDiv.textContent = text;
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const message = input.value.trim();
+      if (!message) return;
+
+      appendMessage(message, true);
+      input.value = '';
+
+      try {
+        const response = await fetch('/text', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+        const data = await response.json();
+        appendMessage(data.response, false);
+      } catch (error) {
+        appendMessage("Error connecting to server.", false);
+      }
+    }
+
+    async function sendImage() {
+      const input = document.getElementById('imageInput');
+      if (!input.files.length) {
+        alert('Please select an image first!');
+        return;
+      }
+
+      appendMessage("[Image sent]", true);
+
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const response = await fetch('/image', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        if (data.error) {
+          appendMessage("Error: " + data.error, false);
+        } else {
+          appendMessage(data.response, false);
+        }
+      } catch (error) {
+        appendMessage("Error connecting to server.", false);
+      }
+    }
+  </script>
+</body>
+</html>
+
+
+
