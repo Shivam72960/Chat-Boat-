@@ -4,7 +4,7 @@ from PIL import Image
 import google.generativeai as genai
 
 app = Flask(__name__)
-genai.configure(api_key="AIzaSyDI8YCtA8MGHoPmOHaIZHMPQkMUwWQ2UeY")
+genai.configure(api_key="AIzaSyDI8YCtA8MGHoPmO***********") # for security Purpose we can't Show Our API Key You Can Run this Project with our API And Check My Project Also
 
 def send_text_request(prompt):
     try:
